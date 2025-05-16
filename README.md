@@ -4,7 +4,7 @@ This is a console-based Blackjack game implemented in Java following the princip
 
 ---
 
-## 📦 Features
+## ♥ Features
 
 - Player vs Dealer gameplay
 - Betting system with balance tracking
@@ -13,4 +13,12 @@ This is a console-based Blackjack game implemented in Java following the princip
 - Support for additional options like **Double** and **Split**
 - Clean and modular codebase with clear separation of concerns
 
+---
+
+## ♠ Future Improvements
+
+- Translate message output into English
+- Implement smooth message output to improve the gaming experience
+- Save game statistics
+- Implement game configuration options
 ---
