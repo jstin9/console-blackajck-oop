@@ -17,8 +17,7 @@ This is a console-based Blackjack game implemented in Java following the princip
 
 ## ♠ Future Improvements
 
-- Translate message output into English
-- Implement smooth message output to improve the gaming experience
 - Save game statistics
 - Implement game configuration options
+
 ---
