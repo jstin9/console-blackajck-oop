@@ -28,6 +28,7 @@ public class ConsoleUI implements GameView{
         outputHandler.println(Messages.currentPoints(dealer.calculateHandValue()));
     }
 
+
     @Override
     public void updatePlayerInfo(Player player) {
         this.player = player;

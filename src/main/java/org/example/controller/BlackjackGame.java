@@ -4,6 +4,7 @@ import org.example.util.Messages;
 import org.example.model.Dealer;
 import org.example.model.Deck;
 import org.example.model.Player;
+import org.example.util.Utils;
 import org.example.view.ConsoleInputHandler;
 import org.example.view.ConsoleOutputHandler;
 import org.example.view.ConsoleUI;
@@ -12,7 +13,6 @@ import org.example.view.GameView;
 public class BlackjackGame {
 
     private Player player;
-    private Dealer dealer;
     private Deck deck;
     private final ConsoleInputHandler inputHandler;
     private final GameView view;
@@ -26,6 +26,7 @@ public class BlackjackGame {
 
     public void start(){
         view.displayMessage(Messages.GREETING);
+        Utils.sleep(500);
 
         String name = requestPlayerName();
         int balance = requestPlayerBalance();
@@ -37,7 +38,7 @@ public class BlackjackGame {
 
     public void startNewGame(String playerName, int startingBalance){
         this.player = new Player(playerName, startingBalance);
-        this.dealer = new Dealer();
+        Dealer dealer = new Dealer();
         this.deck = new Deck();
 
         view.updatePlayerInfo(player);
@@ -58,10 +59,14 @@ public class BlackjackGame {
 
             if(player.getBalance() <= 0){
                 view.displayMessage(Messages.NO_MONEY_GAME_OVER);
+                Utils.sleep(500);
+
                 break;
             }
 
             view.displayMessage(Messages.PLAY_AGAIN);
+            Utils.sleep(500);
+
             String answer = inputHandler.readLine().toLowerCase();
 
             if(!answer.equals("y")){
@@ -69,7 +74,7 @@ public class BlackjackGame {
             } else {
                 if(deck.remainingCards() < 17){
                     deck = new Deck();
-                    view.displayMessage("-----НОВАЯ КОЛОДА БЫЛА ВВЕДЕНА В ИГРУ-----");
+                    view.displayMessage("-----The deck was shuffled-----");
                 }
             }
         }
@@ -81,6 +86,8 @@ public class BlackjackGame {
         boolean validName = false;
         while(!validName){
             view.displayMessage(Messages.ENTER_NAME);
+            Utils.sleep(500);
+
             name = inputHandler.readLine();
             if(!name.isEmpty() && !name.isBlank()){
                 validName = true;
@@ -94,6 +101,8 @@ public class BlackjackGame {
         boolean validBalance = false;
         while(!validBalance){
             view.displayMessage(Messages.ENTER_BALANCE);
+            Utils.sleep(500);
+
             String input = inputHandler.readLine();
 
             if(input.isEmpty()) {

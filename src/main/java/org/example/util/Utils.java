@@ -49,4 +49,12 @@ public class Utils {
             System.out.println(card.getDisplay());
         }
     }
+
+    public static void sleep(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 }
