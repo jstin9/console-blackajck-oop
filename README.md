@@ -1,6 +1,6 @@
-# 🃏 Blackjack Console Game (Java)
+# 🃏 Blackjack Console Game
 
-This is a console-based Blackjack game implemented in Java following the principles of **OOP (Object-Oriented Programming)** and **MVC (Model-View-Controller)** design pattern. The game supports basic Blackjack rules and offers a simple and interactive experience in the terminal.
+This is a console-based Blackjack game implemented in Java following the principles of **OOP** and **MVC** design pattern. The game supports basic Blackjack rules and offers a simple and interactive experience in the terminal.
 
 ---
 
