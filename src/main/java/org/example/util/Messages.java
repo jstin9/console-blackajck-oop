@@ -38,6 +38,9 @@ public class Messages {
     public static final String PLAYER_CANT_SPLIT = "You can't split now!";
     public static final String SPLIT_FIRST_HAND = "Your first hand: ";
     public static final String SPLIT_SECOND_HAND = "Your second hand: ";
+    public static final String ENTER_DECK_COUNT = "Enter count of decks (1-8): ";
+    public static final String DECK_SHUFFLED = "-----The deck was shuffled-----";
+
 
     public static String dealerEndsTurn(int points) {
         return "Dealer ends turn with " + points + " points.";

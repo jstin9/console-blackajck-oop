@@ -8,17 +8,21 @@ public class Deck {
     private final String[] suits = {"♣", "♠", "♥", "♦"};
     private final ArrayList<Card> cards = new ArrayList<>();
     private final Random random = new Random();
+    private final int countDecks;
 
-    public Deck(){
-        generateDeck();
-        generateDeck();
+    public Deck(int countDecks){
+        this.countDecks = countDecks;
+        generateDeck(countDecks);
         shuffle();
     }
 
-    private void generateDeck(){
-        for (String value : values){
-            for (String suit : suits){
-                cards.add(new Card(value, suit));
+
+    private void generateDeck(int countDecks){
+        for (int i = 0; i < countDecks; i++){
+            for (String value : values){
+                for (String suit : suits){
+                    cards.add(new Card(value, suit));
+                }
             }
         }
     }
@@ -36,7 +40,23 @@ public class Deck {
         return cards.size();
     }
 
-    public Card drawCard(){
+    public boolean isEmpty() {
+        return cards.isEmpty();
+    }
+
+    public void reshuffle() {
+        generateDeck(countDecks);
+        shuffle();
+    }
+
+    public Card drawCard() {
+        if (cards.isEmpty()) {
+            throw new IllegalStateException("Deck is empty. Please reshuffle.");
+        }
         return cards.remove(0);
+    }
+
+    public int getCountDecks() {
+        return countDecks;
     }
 }

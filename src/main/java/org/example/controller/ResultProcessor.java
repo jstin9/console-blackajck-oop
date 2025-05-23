@@ -69,15 +69,15 @@ public class ResultProcessor {
             view.displayMessage(Messages.BUST_BY_PLAYER);
         } else if (dealerPoints > 21) {
             view.displayMessage(Messages.BUST_BY_DEALER);
-            player.addWinnings(player.getCurrentBet() * 2);
+            player.addWinnings(player.getCurrentBet());
         } else if (playerPoints > dealerPoints) {
             view.displayMessage(Messages.WIN_BY_PLAYER);
-            player.addWinnings(player.getCurrentBet() * 2);
+            player.addWinnings(player.getCurrentBet());
         } else if (dealerPoints > playerPoints) {
             view.displayMessage(Messages.WIN_BY_DEALER);
         } else {
             view.displayMessage(Messages.PUSH);
-            player.addWinnings(player.getCurrentBet());
+            player.addWinnings(player.getCurrentBet() / 2);
         }
 
     }

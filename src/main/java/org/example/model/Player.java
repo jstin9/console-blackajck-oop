@@ -23,13 +23,12 @@ public class Player {
         return amount <= balance;
     }
 
-    public boolean placeBet(int amount){
+    public void placeBet(int amount){
         if(amount > balance){
-            return false;
+            return;
         }
         currentBet += amount;
         balance -= amount;
-        return true;
     }
 
     public int calculateHandValue(ArrayList<Card> hand) {

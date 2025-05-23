@@ -19,5 +19,8 @@ This is a console-based Blackjack game implemented in Java following the princip
 
 - [ ] Save game statistics
 - [ ] Implement game configuration options
-
+- [ ] FIX: If a player doubles, the card he took must be shown
+- [ ] FIX: If a player hits, and got 21, the card he took must be shown
+- [ ] FIX: If a player got instantly 21, the hand must be shown before the dealer's turn
+- [ ] Simplify playTurnForHand() method
 ---

@@ -11,8 +11,6 @@ public class Dealer {
         this.hand = new ArrayList<>();
     }
 
-
-
     public int calculateHandValue() {
         return Utils.calculateHandValue(hand);
     }

@@ -30,16 +30,33 @@ public class BlackjackGame {
 
         String name = requestPlayerName();
         int balance = requestPlayerBalance();
+        int countDecks = requestDeckCount();
 
-        startNewGame(name, balance);
+        startNewGame(name, balance, countDecks);
 
         playGameLoop();
     }
 
-    public void startNewGame(String playerName, int startingBalance){
+    private int requestDeckCount() {
+        String input = "";
+        boolean validCount = false;
+        while(!validCount) {
+            view.displayMessage(Messages.ENTER_DECK_COUNT);
+            Utils.sleep(500);
+
+            input = inputHandler.readLine();
+
+            if (!input.isEmpty() && Integer.parseInt(input) >= 1 && Integer.parseInt(input) <= 8) {
+                validCount = true;
+            }
+        }
+        return Integer.parseInt(input);
+    }
+
+    public void startNewGame(String playerName, int startingBalance, int countDecks) {
         this.player = new Player(playerName, startingBalance);
         Dealer dealer = new Dealer();
-        this.deck = new Deck();
+        this.deck = new Deck(countDecks);
 
         view.updatePlayerInfo(player);
         view.updateDealerInfo(dealer);
@@ -72,9 +89,9 @@ public class BlackjackGame {
             if(!answer.equals("y")){
                 continuePlaying = false;
             } else {
-                if(deck.remainingCards() < 17){
-                    deck = new Deck();
-                    view.displayMessage("-----The deck was shuffled-----");
+                if(deck.remainingCards() < deck.getCountDecks() * 52 * 0.25){
+                    deck.reshuffle();
+                    view.displayMessage(Messages.DECK_SHUFFLED);
                 }
             }
         }
