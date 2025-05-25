@@ -13,9 +13,9 @@ import org.example.view.GameView;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 
-
 public class RoundManager {
-
+    private static final int DELAY = 500;
+    
     private final ConsoleInputHandler inputHandler;
     private final ResultProcessor resultProcessor;
     private final GameView view;
@@ -38,64 +38,61 @@ public class RoundManager {
     }
 
     public void playRound() {
-        showBalanceAndPlaceBet();
+        showPlayerBalance();
+        placeBet();
         dealInitialCards();
-        if(checkForBlackjack()){
+        
+        if(checkForBlackjack()) {
             return;
         }
+        
         playerTurn();
     }
 
-    public void showBalanceAndPlaceBet() {
-        view.displayMessage(Messages.getBalance(player));
-        Utils.sleep(500);
-
+    private void showPlayerBalance() {
+        displayMessageWithDelay(Messages.getBalance(player));
+    }
+    
+    private void placeBet() {
         boolean validBet = false;
 
         while (!validBet) {
-            view.displayMessage(Messages.ENTER_BET);
-            Utils.sleep(500);
-
+            displayMessageWithDelay(Messages.ENTER_BET);
             String input = inputHandler.readLine();
 
             if (input.isEmpty()) {
-                view.displayMessage(Messages.ENTER_BET_INCORRECT);
-                Utils.sleep(500);
-
+                displayMessageWithDelay(Messages.ENTER_BET_INCORRECT);
                 continue;
             }
 
-            try {
-                int bet = Integer.parseInt(input);
-
-                if (bet <= 0) {
-                    view.displayMessage(Messages.INCORRECT_BET);
-                    Utils.sleep(500);
-
-                    continue;
-                }
-
-                if (player.canPlaceBet(bet)) {
-                    player.placeBet(bet);
-                    view.displayMessage(Messages.BET_IS_PLACED);
-                    Utils.sleep(500);
-
-                    validBet = true;
-                } else {
-                    view.displayMessage(Messages.INSUFFICIENT_FUNDS);
-                    Utils.sleep(500);
-
-                }
-
-            } catch (NumberFormatException e) {
-                view.displayMessage(Messages.ENTER_BET_ERROR);
-                Utils.sleep(500);
-
+            validBet = processPlayerBet(input);
+        }
+    }
+    
+    private boolean processPlayerBet(String input) {
+        try {
+            int bet = Integer.parseInt(input);
+            
+            if (bet <= 0) {
+                displayMessageWithDelay(Messages.INCORRECT_BET);
+                return false;
             }
+
+            if (player.canPlaceBet(bet)) {
+                player.placeBet(bet);
+                displayMessageWithDelay(Messages.BET_IS_PLACED);
+                return true;
+            } else {
+                displayMessageWithDelay(Messages.INSUFFICIENT_FUNDS);
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            displayMessageWithDelay(Messages.ENTER_BET_ERROR);
+            return false;
         }
     }
 
-    public void dealInitialCards(){
+    public void dealInitialCards() {
         player.clearHand();
         dealer.clearHand();
 
@@ -104,11 +101,10 @@ public class RoundManager {
         dealer.receiveCard(deck.drawCard());
     }
 
-    public boolean checkForBlackjack(){
+    public boolean checkForBlackjack() {
         if(player.calculateHandValue(player.getHand()) == 21) {
-            view.displayMessage(Messages.BLACKJACK);
-            Utils.sleep(500);
-
+            displayPlayerHandInfo();
+            displayMessageWithDelay(Messages.BLACKJACK);
             dealerPlayTurn();
             resultProcessor.determineWinner(WinType.BLACKJACK);
             return true;
@@ -116,181 +112,259 @@ public class RoundManager {
         return false;
     }
 
-    public void playTurnForHand(ArrayList<Card> hand, String handName, boolean isSplit){
-
-        boolean turnOver = false;
-
-        while(!turnOver){
-            view.displayMessage("");
-            if(isSplit){
-                view.displayMessage(handName + ":");
-                Utils.sleep(500);
-
-                Utils.printHand(hand);
-                view.displayMessage(Messages.currentPoints(player.calculateHandValue(hand)));
-                Utils.sleep(500);
-
-                view.displayMessage(Messages.CHOICE_SPLIT);
-                Utils.sleep(500);
-
-            } else {
-                view.showTable();
-                Utils.sleep(500);
-
-                view.displayMessage(Messages.CHOICE);
-                Utils.sleep(500);
-
-            }
-
-            String input = inputHandler.readLine();
-
-            if(input.isEmpty()){
-                view.displayMessage(Messages.CHOICE_EMPTY);
-                Utils.sleep(500);
-
-                continue;
-            }
-            int choice;
-            try {
-                choice = Integer.parseInt(input);
-            } catch (NumberFormatException e){
-                view.displayMessage(Messages.CHOICE_INCORRECT);
-                Utils.sleep(500);
-
-                continue;
-            }
-            try {
-                switch (choice) {
-                    case 1 -> { // Hit
-                        hand.add(deck.drawCard());
-                        if(!isSplit) resultProcessor.updatePoints();
-                        if(player.calculateHandValue(player.getHand()) > 21){
-                            view.displayMessage(Messages.BUST);
-                            Utils.sleep(500);
-
-                            turnOver = true;
-                            if(!isSplit) resultProcessor.determineWinner(WinType.REGULAR);
-                        } else if (player.calculateHandValue(player.getHand()) == 21 && !isSplit) {
-                            turnOver = true;
-                            dealerPlayTurn();
-                            resultProcessor.determineWinner(WinType.REGULAR);
-                        }
-                    }
-                    case 2 -> { // Stand
-                        turnOver = true;
-                        if(!isSplit){
-                            playerStand();
-                        }
-                    }
-                    case 3 -> { // Double
-                        if(!isSplit) {
-                            playerDouble();
-                            turnOver = true;
-                        }
-                    }
-                    case 4 -> { // Split
-                        if(!isSplit && Utils.isSplit(player.getHand()) && player.getBalance() >= player.getCurrentBet()) {
-                            player.placeBet(player.getCurrentBet());
-                            playerSplit();
-                            turnOver = true;
-                        } else {
-                            view.displayMessage(Messages.PLAYER_CANT_SPLIT);
-                            Utils.sleep(500);
-
-                        }
-                    }
-                    default ->{
-                        view.displayMessage(Messages.INCORRECT_INPUT);
-                        Utils.sleep(500);
-                    }
-
-                }
-            }catch (InputMismatchException e){
-                view.displayMessage(Messages.CHOICE_EXCEPTION);
-                Utils.sleep(500);
-
-            }
-
-        }
-    }
-
-    public void playerTurn(){
+    public void playerTurn() {
         playTurnForHand(player.getHand(), "", false);
     }
-
+    
     public void playHand(ArrayList<Card> hand, String handName) {
         playTurnForHand(hand, handName, true);
     }
+    
+    public void playTurnForHand(ArrayList<Card> hand, String handName, boolean isSplit) {
+        boolean turnOver = false;
 
-    public void dealerPlayTurn(){
-        view.displayMessage(Messages.DEALER_HAND);
-        Utils.sleep(500);
-        Utils.printHand(dealer.getHand());
-        view.displayMessage(Messages.currentPoints(dealer.calculateHandValue()));
-        Utils.sleep(500);
-
-        while(Utils.calculateHandValue(dealer.getHand()) < 17){
-            Card card = deck.drawCard();
-            dealer.receiveCard(card);
-            System.out.println(Messages.DEALER_TAKES_THE_CARD + card.getDisplay());
-            Utils.sleep(500);
-
+        while(!turnOver) {
+            displayHandInformation(hand, handName, isSplit);
+            
+            String input = inputHandler.readLine();
+            
+            if (input.isEmpty()) {
+                displayMessageWithDelay(Messages.CHOICE_EMPTY);
+                continue;
+            }
+            
+            turnOver = processPlayerChoice(input, hand, isSplit);
         }
-        System.out.println(Messages.dealerEndsTurn(Utils.calculateHandValue(dealer.getHand())));
-        Utils.sleep(500);
-
+    }
+    
+    private void displayHandInformation(ArrayList<Card> hand, String handName, boolean isSplit) {
+        view.displayMessage("");
+        
+        if (isSplit) {
+            displaySplitHandInfo(hand, handName);
+        } else {
+            displayRegularHandInfo();
+        }
+    }
+    
+    private void displaySplitHandInfo(ArrayList<Card> hand, String handName) {
+        displayMessageWithDelay(handName + ":");
+        Utils.printHand(hand);
+        displayMessageWithDelay(Messages.currentPoints(player.calculateHandValue(hand)));
+        displayMessageWithDelay(Messages.CHOICE_SPLIT);
+    }
+    
+    private void displayRegularHandInfo() {
+        view.showTable();
+        delay();
+        displayMessageWithDelay(Messages.CHOICE);
+    }
+    
+    private boolean processPlayerChoice(String input, ArrayList<Card> hand, boolean isSplit) {
+        int choice;
+        
+        try {
+            choice = Integer.parseInt(input);
+        } catch (NumberFormatException e) {
+            displayMessageWithDelay(Messages.CHOICE_INCORRECT);
+            return false;
+        }
+        
+        try {
+            return executePlayerAction(choice, hand, isSplit);
+        } catch (InputMismatchException e) {
+            displayMessageWithDelay(Messages.CHOICE_EXCEPTION);
+            return false;
+        }
+    }
+    
+    private boolean executePlayerAction(int choice, ArrayList<Card> hand, boolean isSplit) {
+        switch (choice) {
+            case 1 -> { // Hit
+                return handlePlayerHit(hand, isSplit);
+            }
+            case 2 -> { // Stand
+                return handlePlayerStand(isSplit);
+            }
+            case 3 -> { // Double
+                return handlePlayerDouble(isSplit);
+            }
+            case 4 -> { // Split
+                return handlePlayerSplit(isSplit);
+            }
+            default -> {
+                displayMessageWithDelay(Messages.INCORRECT_INPUT);
+                return false;
+            }
+        }
+    }
+    
+    private boolean handlePlayerHit(ArrayList<Card> hand, boolean isSplit) {
+        hand.add(deck.drawCard());
+        
+        if (!isSplit) {
+            resultProcessor.updatePoints();
+        }
+        
+        int handValue = player.calculateHandValue(hand);
+        
+        if (handValue > 21) {
+            displayMessageWithDelay(Messages.BUST);
+            if (!isSplit) {
+                resultProcessor.determineWinner(WinType.REGULAR);
+            }
+            return true;
+        } else if (handValue == 21 && !isSplit) {
+            displayPlayerHandInfo();
+            dealerPlayTurn();
+            resultProcessor.determineWinner(WinType.REGULAR);
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private boolean handlePlayerStand(boolean isSplit) {
+        if (!isSplit) {
+            playerStand();
+        }
+        return true;
+    }
+    
+    private boolean handlePlayerDouble(boolean isSplit) {
+        if (!isSplit) {
+            playerDouble();
+            return true;
+        }
+        return false;
+    }
+    
+    private boolean handlePlayerSplit(boolean isSplit) {
+        if (!isSplit && Utils.isSplit(player.getHand()) && player.getBalance() >= player.getCurrentBet()) {
+            player.placeBet(player.getCurrentBet());
+            playerSplit();
+            return true;
+        } else {
+            displayMessageWithDelay(Messages.PLAYER_CANT_SPLIT);
+            return false;
+        }
     }
 
-    public void playerHit(){
+    public void playerHit() {
         player.receiveCard(deck.drawCard());
     }
 
-    public void playerStand(){
+    public void playerStand() {
         dealerPlayTurn();
         resultProcessor.determineResult();
     }
 
-    public void playerDouble(){
+    public void playerDouble() {
         player.placeBet(player.getCurrentBet());
         playerHit();
+        displayPlayerHandInfo();
         playerStand();
     }
 
-    public void playerSplit(){
+    public void playerSplit() {
         ArrayList<Card> playerHand = player.getHand();
-        ArrayList<Card> firstHand = new ArrayList<>();
-        ArrayList<Card> secondHand = new ArrayList<>();
+        ArrayList<Card> firstHand = createSplitHand(playerHand.get(0));
+        ArrayList<Card> secondHand = createSplitHand(playerHand.get(1));
+        
+        displaySplitHandsInfo(firstHand, secondHand);
+        
+        processSplitHands(firstHand, secondHand);
+    }
+    
+    private ArrayList<Card> createSplitHand(Card initialCard) {
+        ArrayList<Card> hand = new ArrayList<>();
+        hand.add(initialCard);
+        hand.add(deck.drawCard());
+        return hand;
+    }
+    
+    private void displaySplitHandsInfo(ArrayList<Card> firstHand, ArrayList<Card> secondHand) {
+        displayMessageWithDelay(Messages.SPLIT_FIRST_HAND);
+        Utils.printHand(firstHand);
+        displayMessageWithDelay(Messages.currentPoints(player.calculateHandValue(firstHand)));
+        
+        displayMessageWithDelay(Messages.SPLIT_SECOND_HAND);
+        Utils.printHand(secondHand);
+        displayMessageWithDelay(Messages.currentPoints(player.calculateHandValue(secondHand)));
+    }
+    
+    private void processSplitHands(ArrayList<Card> firstHand, ArrayList<Card> secondHand) {
         String firstHandName = "First hand";
         String secondHandName = "Second hand";
-
-        firstHand.add(playerHand.get(0));
-        secondHand.add(playerHand.get(1));
-        firstHand.add(deck.drawCard());
-        secondHand.add(deck.drawCard());
-
-        view.displayMessage(Messages.SPLIT_FIRST_HAND);
-        Utils.sleep(500);
-
-        Utils.printHand(firstHand);
-        view.displayMessage(Messages.currentPoints(player.calculateHandValue(firstHand)));
-        Utils.sleep(500);
-
-        view.displayMessage(Messages.SPLIT_SECOND_HAND);
-        Utils.sleep(500);
-
-        Utils.printHand(secondHand);
-        view.displayMessage(Messages.currentPoints(player.calculateHandValue(secondHand)));
-        Utils.sleep(500);
-
-
-        playHand(firstHand, firstHandName);
-        playHand(secondHand, secondHandName);
-
-        dealerPlayTurn();
-
-        resultProcessor.determineSplitWinner(firstHand, firstHandName);
-        resultProcessor.determineSplitWinner(secondHand, secondHandName);
-
+        
+        boolean firstHandBusted = playHandAndCheckBust(firstHand, firstHandName);
+        boolean secondHandBusted = playHandAndCheckBust(secondHand, secondHandName);
+        
+        if (!firstHandBusted || !secondHandBusted) {
+            dealerPlayTurn();
+        }
+        
+        determineSplitResults(firstHand, secondHand, firstHandName, secondHandName, firstHandBusted, secondHandBusted);
+        
         player.resetBet();
+    }
+    
+    private boolean playHandAndCheckBust(ArrayList<Card> hand, String handName) {
+        playHand(hand, handName);
+        return player.calculateHandValue(hand) > 21;
+    }
+    
+    private void determineSplitResults(ArrayList<Card> firstHand, ArrayList<Card> secondHand, 
+                                    String firstHandName, String secondHandName,
+                                    boolean firstHandBusted, boolean secondHandBusted) {
+        if (firstHandBusted) {
+            displayMessageWithDelay(firstHandName + ": " + Messages.BUST);
+        } else {
+            resultProcessor.determineSplitWinner(firstHand, firstHandName);
+        }
+        
+        if (secondHandBusted) {
+            displayMessageWithDelay(secondHandName + ": " + Messages.BUST);
+        } else {
+            resultProcessor.determineSplitWinner(secondHand, secondHandName);
+        }
+    }
+
+    public void dealerPlayTurn() {
+        displayDealerHandInfo();
+        playDealerCards();
+    }
+    
+    private void displayDealerHandInfo() {
+        displayMessageWithDelay(Messages.DEALER_HAND);
+        Utils.printHand(dealer.getHand());
+        displayMessageWithDelay(Messages.currentPoints(dealer.calculateHandValue()));
+    }
+
+    private void displayPlayerHandInfo() {
+        displayMessageWithDelay(Messages.PLAYER_HAND);
+        Utils.printHand(player.getHand());
+        displayMessageWithDelay(Messages.currentPoints(player.calculateHandValue(player.getHand())));
+    }
+    
+    private void playDealerCards() {
+        while(Utils.calculateHandValue(dealer.getHand()) < 17) {
+            Card card = deck.drawCard();
+            dealer.receiveCard(card);
+            System.out.println(Messages.DEALER_TAKES_THE_CARD + card.getDisplay());
+            delay();
+        }
+        
+        System.out.println(Messages.dealerEndsTurn(Utils.calculateHandValue(dealer.getHand())));
+        delay();
+    }
+    
+    private void displayMessageWithDelay(String message) {
+        view.displayMessage(message);
+        delay();
+    }
+    
+    private void delay() {
+        Utils.sleep(DELAY);
     }
 }
