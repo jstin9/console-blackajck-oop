@@ -17,7 +17,7 @@ This is a console-based Blackjack game implemented in Java following the princip
 
 ## ♠ TODO
 
-- [Х] Save game statistics
-- [Х] Implement game configuration options
-- [Х] Realise game menu
+- [x] Save game statistics
+- [x] Implement game configuration options
+- [x] Realise game menu
 ---
