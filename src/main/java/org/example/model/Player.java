@@ -5,7 +5,7 @@ import org.example.util.Utils;
 import java.util.ArrayList;
 
 public class Player {
-    private final String name;
+    private String name;
     private int balance;
     private final ArrayList<Card> hand;
     private int currentBet;
@@ -67,4 +67,11 @@ public class Player {
         return currentBet;
     }
 
+    public void setBalance(int balance) {
+        this.balance = balance;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

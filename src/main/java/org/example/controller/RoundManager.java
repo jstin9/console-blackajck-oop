@@ -42,10 +42,8 @@ public class RoundManager {
         placeBet();
         dealInitialCards();
         
-        if(checkForBlackjack()) {
-            return;
-        }
-        
+        if(checkForBlackjack()) return;
+
         playerTurn();
     }
 

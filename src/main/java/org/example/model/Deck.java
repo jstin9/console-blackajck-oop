@@ -8,7 +8,7 @@ public class Deck {
     private final String[] suits = {"♣", "♠", "♥", "♦"};
     private final ArrayList<Card> cards = new ArrayList<>();
     private final Random random = new Random();
-    private final int countDecks;
+    private int countDecks;
 
     public Deck(int countDecks){
         this.countDecks = countDecks;
@@ -58,5 +58,9 @@ public class Deck {
 
     public int getCountDecks() {
         return countDecks;
+    }
+
+    public void setCountDecks(int countDecks) {
+        this.countDecks = countDecks;
     }
 }
